@@ -1,4 +1,4 @@
-# SMEIC - School Management for Educational Institution Canteen
+# SMEIC - University Management for Educational Institution Canteen
 
 ## University Canteen Management System
 
