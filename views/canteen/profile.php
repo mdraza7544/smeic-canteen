@@ -1,0 +1,27 @@
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Canteen Profile</h1>
+        <p class="page-subtitle">Your account details</p>
+    </div>
+</div>
+<div class="card max-w-xl">
+    <div class="card-header">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-pink-500 flex items-center justify-center text-white text-lg font-bold">
+                <?= e(strtoupper(substr($st['full_name'], 0, 1))) ?>
+            </div>
+            <span>Canteen Staff</span>
+        </div>
+    </div>
+    <div class="card-body space-y-3 text-sm">
+        <div class="flex justify-between py-2 border-b border-slate-100"><span class="text-slate-500">Name</span><span class="font-medium"><?= e($st['full_name']) ?></span></div>
+        <div class="flex justify-between py-2 border-b border-slate-100"><span class="text-slate-500">Email</span><span><?= e($st['email']) ?></span></div>
+        <div class="flex justify-between py-2"><span class="text-slate-500">Phone</span><span><?= e($st['phone']) ?></span></div>
+    </div>
+    <div class="card-body border-t">
+        <a class="btn btn-primary" href="<?= e(url('index.php?action=change-password')) ?>">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+            Change Password
+        </a>
+    </div>
+</div>

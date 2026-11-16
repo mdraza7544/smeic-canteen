@@ -1,0 +1,16 @@
+{
+    "name": "smeic/school-canteen",
+    "description": "School Canteen Management System",
+    "type": "project",
+    "require": {
+        "php": ">=8.0",
+        "dompdf/dompdf": "^1.2",
+        "phpmailer/phpmailer": "^6.8",
+        "chillerlan/php-qrcode": "^4.3"
+    },
+    "autoload": {
+        "psr-4": {
+            "SMEIC\\": ""
+        }
+    }
+}

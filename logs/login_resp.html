@@ -1,0 +1,166 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Change Password &mdash; SMEIC - School Canteen</title>
+    <link rel="icon" type="image/svg+xml" href="http://localhost/SMEIC/public/assets/img/favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="http://localhost/SMEIC/public/assets/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
+    <meta name="csrf-token" content="61e907c1885911575a22692612c6da268b4517eda96500f284985246908e6998">
+</head>
+<body class="app-shell" data-user-id="1" data-user-type="admin">
+
+<header class="topbar">
+    <div class="topbar-inner">
+        <div class="topbar-left">
+            <button id="sidebarToggle" class="sidebar-toggle" aria-label="Toggle menu">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+            </button>
+            <a href="http://localhost/SMEIC/public/index.php" class="topbar-brand">
+                <span class="logo-mark">SC</span>
+                <span class="brand-text">SMEIC - School Canteen</span>
+            </a>
+        </div>
+        <div class="topbar-right">
+                                            <div class="user-chip">
+                    <div class="avatar">C</div>
+                    <div class="info">
+                        <div class="name">Canteen Manager</div>
+                        <div class="role">admin</div>
+                    </div>
+                </div>
+                <a href="http://localhost/SMEIC/public/index.php?action=logout" class="btn btn-ghost btn-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                    <span class="logout-text">Logout</span>
+                </a>
+                    </div>
+    </div>
+</header>
+
+    <div id="flash-container" class="flash-container">
+                    <div class="flash-msg flash-info">Please change your temporary password to continue.</div>
+            </div>
+    <script>
+        setTimeout(()=>{ document.querySelectorAll('.flash-msg').forEach(el=>{ el.style.transition='opacity 0.4s'; el.style.opacity='0'; setTimeout(()=>el.remove(),400); }); }, 4500);
+    </script>
+
+<div class="app-main">
+<aside id="sidebar" class="sidebar">
+    <nav>
+                    <a href="http://localhost/SMEIC/public/index.php?action=admin/dashboard" class="sidebar-link ">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                <span class="link-label">Dashboard</span>
+                            </a>
+                    <a href="http://localhost/SMEIC/public/index.php?action=admin/students" class="sidebar-link ">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                <span class="link-label">Students</span>
+                            </a>
+                    <a href="http://localhost/SMEIC/public/index.php?action=admin/parents" class="sidebar-link ">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                <span class="link-label">Parents</span>
+                            </a>
+                    <a href="http://localhost/SMEIC/public/index.php?action=admin/topup" class="sidebar-link ">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+                <span class="link-label">Wallet Top-up</span>
+                            </a>
+                    <a href="http://localhost/SMEIC/public/index.php?action=admin/orders" class="sidebar-link ">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                <span class="link-label">Orders</span>
+                            </a>
+                    <a href="http://localhost/SMEIC/public/index.php?action=admin/transactions" class="sidebar-link ">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <span class="link-label">Transactions</span>
+                            </a>
+                    <a href="http://localhost/SMEIC/public/index.php?action=admin/menu" class="sidebar-link ">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/></svg>
+                <span class="link-label">Menu</span>
+                            </a>
+                    <a href="http://localhost/SMEIC/public/index.php?action=admin/reports" class="sidebar-link ">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                <span class="link-label">Reports</span>
+                            </a>
+                    <a href="http://localhost/SMEIC/public/index.php?action=admin/audit" class="sidebar-link ">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                <span class="link-label">Audit Log</span>
+                            </a>
+                <div class="sidebar-divider">
+            <a href="http://localhost/SMEIC/public/index.php?action=change-password" class="sidebar-link">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
+                <span class="link-label">Change Password</span>
+            </a>
+        </div>
+    </nav>
+</aside>
+
+<main class="app-content">
+<div class="auth-page">
+    <div class="auth-card">
+        <div class="card">
+            <div class="card-header">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center text-white">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                    </div>
+                    <div>
+                        <div class="text-base">Set your new password</div>
+                        <div class="text-xs text-slate-500 font-normal">Must be at least 6 characters</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                                                <form method="post" class="space-y-4" autocomplete="off">
+                    <input type="hidden" name="csrf_token" value="61e907c1885911575a22692612c6da268b4517eda96500f284985246908e6998">                    <div>
+                        <label class="form-label">Current Password</label>
+                        <input type="password" name="current_password" class="form-input" required>
+                    </div>
+                    <div>
+                        <label class="form-label">New Password</label>
+                        <input type="password" name="new_password" class="form-input" minlength="6" required>
+                    </div>
+                    <div>
+                        <label class="form-label">Confirm New Password</label>
+                        <input type="password" name="confirm_password" class="form-input" minlength="6" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-full !py-3 text-base">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        Update Password
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</main>
+</div><!-- /app-main -->
+
+<footer class="app-footer">
+    &copy; 2026 SMEIC - School Canteen &middot; Developed by team SMEIC
+</footer>
+
+<div id="toast-container" class="toast-container"></div>
+<div id="sidebar-backdrop" class="sidebar-backdrop hidden" style="display:none" onclick="closeSidebar()"></div>
+
+<script src="http://localhost/SMEIC/public/assets/js/app.js"></script>
+<script src="http://localhost/SMEIC/public/assets/js/notifications.js"></script>
+<script>
+function closeSidebar() {
+    document.getElementById('sidebar')?.classList.remove('open');
+    document.getElementById('sidebar-backdrop')?.classList.add('hidden');
+}
+function openSidebar() {
+    document.getElementById('sidebar')?.classList.add('open');
+    document.getElementById('sidebar-backdrop')?.classList.remove('hidden');
+}
+document.getElementById('sidebarToggle')?.addEventListener('click', function () {
+    const sb = document.getElementById('sidebar');
+    if (sb?.classList.contains('open')) closeSidebar(); else openSidebar();
+});
+</script>
+</body>
+</html>
+

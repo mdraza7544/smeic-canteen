@@ -1,0 +1,9 @@
+# Root .htaccess — minimal, no rewrite to avoid loops.
+# Just block direct access to private dirs; users go to /SMEIC/public/ for the app.
+DirectoryIndex public/index.php
+
+# Block direct access to private directories
+RedirectMatch 403 ^/SMEIC/(config|controllers|models|logs|exports|vendor|scripts)/.*$
+
+# Disable directory listing
+Options -Indexes

@@ -1,0 +1,615 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test &mdash; SMEIC - School Canteen</title>
+    <link rel="icon" type="image/svg+xml" href="http://localhost/SMEIC/public/assets/img/favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="http://localhost/SMEIC/public/assets/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
+    <meta name="csrf-token" content="a94ebf7e85f759cf53db4d566a3a3825d6da2ec266e4418a2c1cbb725bf69a6b">
+</head>
+<body class="app-shell" data-user-id="1" data-user-type="canteen">
+
+<header class="topbar">
+    <div class="topbar-inner">
+        <div class="topbar-left">
+            <button id="sidebarToggle" class="sidebar-toggle" aria-label="Toggle menu">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+            </button>
+            <a href="http://localhost/SMEIC/public/index.php" class="topbar-brand">
+                <span class="logo-mark">SC</span>
+                <span class="brand-text">SMEIC - School Canteen</span>
+            </a>
+        </div>
+        <div class="topbar-right">
+                                            <div class="user-chip">
+                    <div class="avatar">C</div>
+                    <div class="info">
+                        <div class="name">Canteen Manager</div>
+                        <div class="role">canteen</div>
+                    </div>
+                </div>
+                <a href="http://localhost/SMEIC/public/index.php?action=logout" class="btn btn-ghost btn-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                    <span class="logout-text">Logout</span>
+                </a>
+                    </div>
+    </div>
+</header>
+
+
+<div class="app-main">
+<aside id="sidebar" class="sidebar">
+    <nav>
+                    <a href="http://localhost/SMEIC/public/index.php?action=canteen/dashboard" class="sidebar-link active">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                <span class="link-label">Dashboard</span>
+                            </a>
+                    <a href="http://localhost/SMEIC/public/index.php?action=canteen/orders" class="sidebar-link ">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                <span class="link-label">Orders</span>
+                            </a>
+                    <a href="http://localhost/SMEIC/public/index.php?action=canteen/scan-pickup" class="sidebar-link ">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
+                <span class="link-label">Scan Pickup</span>
+                            </a>
+                    <a href="http://localhost/SMEIC/public/index.php?action=canteen/menu" class="sidebar-link ">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/></svg>
+                <span class="link-label">Menu Items</span>
+                            </a>
+                    <a href="http://localhost/SMEIC/public/index.php?action=canteen/daily-special" class="sidebar-link ">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.957a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.37 2.448a1 1 0 00-.364 1.118l1.287 3.957c.3.922-.755 1.688-1.54 1.118l-3.36-2.448a1 1 0 00-1.175 0l-3.371 2.448c-.784.57-1.838-.197-1.539-1.118l1.287-3.957a1 1 0 00-.364-1.118L2.05 9.384c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69l1.286-3.957z"/></svg>
+                <span class="link-label">Daily Specials</span>
+                            </a>
+                    <a href="http://localhost/SMEIC/public/index.php?action=canteen/earnings" class="sidebar-link ">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <span class="link-label">Earnings</span>
+                            </a>
+                    <a href="http://localhost/SMEIC/public/index.php?action=canteen/profile" class="sidebar-link ">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                <span class="link-label">Profile</span>
+                            </a>
+                <div class="sidebar-divider">
+            <a href="http://localhost/SMEIC/public/index.php?action=change-password" class="sidebar-link">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
+                <span class="link-label">Change Password</span>
+            </a>
+        </div>
+    </nav>
+</aside>
+
+<main class="app-content">
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Menu Management</h1>
+        <p class="page-subtitle">Add, edit, and manage canteen offerings</p>
+    </div>
+    <button class="btn btn-primary" onclick="document.getElementById('form').classList.remove('hidden')">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        New Item
+    </button>
+</div>
+
+<div id="form" class="card mb-4 hidden">
+    <div class="card-header">Add New Menu Item</div>
+    <div class="card-body">
+        <form method="post" action="http://localhost/SMEIC/public/index.php?action=canteen/menu-save" enctype="multipart/form-data" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <input type="hidden" name="csrf_token" value="a94ebf7e85f759cf53db4d566a3a3825d6da2ec266e4418a2c1cbb725bf69a6b">            <input type="hidden" name="id" value="0">
+            <input type="hidden" name="existing_image" value="">
+            <div><label class="form-label">Name *</label><input class="form-input" name="name" required value=""></div>
+            <div>
+                <label class="form-label">Category</label>
+                <select class="form-select" name="category">
+                                            <option value="veg" >Veg</option>
+                                            <option value="nonveg" >Nonveg</option>
+                                            <option value="snacks" >Snacks</option>
+                                            <option value="drinks" >Drinks</option>
+                                            <option value="desserts" >Desserts</option>
+                                    </select>
+            </div>
+            <div class="md:col-span-2"><label class="form-label">Description</label><textarea class="form-textarea" name="description" rows="2"></textarea></div>
+            <div><label class="form-label">Price (₹) *</label><input type="number" min="1" step="0.01" class="form-input" name="price" required value=""></div>
+            <div><label class="form-label">Image (jpg/png/webp, max 4MB)</label><input type="file" accept="image/*" class="form-input" name="image"></div>
+            <div class="md:col-span-2 flex items-center gap-2">
+                <input id="avail" type="checkbox" name="is_available" value="1" checked class="w-4 h-4 text-indigo-600 rounded">
+                <label for="avail" class="text-sm text-slate-700">Available for ordering</label>
+            </div>
+            <div class="md:col-span-2 flex gap-2">
+                <button class="btn btn-primary">Create Item</button>
+                <a href="http://localhost/SMEIC/public/index.php?action=canteen/menu" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+            </div>
+</div>
+
+<div class="menu-grid">
+            <div class="menu-card">
+            <img src="<br />
+<b>Warning</b>:  Undefined array key "image" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>54</b><br />
+http://localhost/SMEIC/public/assets/img/placeholder.png" class="menu-img" alt="">
+            <div class="menu-body">
+                <div class="flex items-center justify-between gap-2">
+                    <span class="badge badge-<br />
+<b>Warning</b>:  Undefined array key "category" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>57</b><br />
+"><br />
+<b>Warning</b>:  Undefined array key "category" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>57</b><br />
+</span>
+                    <span class="text-lg font-extrabold text-indigo-700 num"><br />
+<b>Warning</b>:  Undefined array key "price" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>58</b><br />
+₹0.00</span>
+                </div>
+                <div class="menu-name"><br />
+<b>Warning</b>:  Undefined array key "name" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>60</b><br />
+</div>
+                <div class="menu-desc"><br />
+<b>Warning</b>:  Undefined array key "description" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>61</b><br />
+</div>
+                <div class="flex items-center justify-between gap-1 mt-1">
+                    <form method="post" action="http://localhost/SMEIC/public/index.php?action=canteen/menu-save" class="inline">
+                        <input type="hidden" name="csrf_token" value="a94ebf7e85f759cf53db4d566a3a3825d6da2ec266e4418a2c1cbb725bf69a6b">                        <input type="hidden" name="id" value="<br />
+<b>Warning</b>:  Undefined array key "id" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>65</b><br />
+">
+                        <input type="hidden" name="name" value="<br />
+<b>Warning</b>:  Undefined array key "name" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>66</b><br />
+">
+                        <input type="hidden" name="description" value="<br />
+<b>Warning</b>:  Undefined array key "description" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>67</b><br />
+">
+                        <input type="hidden" name="price" value="<br />
+<b>Warning</b>:  Undefined array key "price" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>68</b><br />
+">
+                        <input type="hidden" name="category" value="<br />
+<b>Warning</b>:  Undefined array key "category" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>69</b><br />
+">
+                        <input type="hidden" name="existing_image" value="<br />
+<b>Warning</b>:  Undefined array key "image" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>70</b><br />
+">
+                        <input type="hidden" name="is_available" value="<br />
+<b>Warning</b>:  Undefined array key "is_available" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>71</b><br />
+1">
+                        <button class="badge <br />
+<b>Warning</b>:  Undefined array key "is_available" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>72</b><br />
+bg-red-100 text-red-700 cursor-pointer">
+                            <br />
+<b>Warning</b>:  Undefined array key "is_available" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>73</b><br />
+● Hidden                        </button>
+                    </form>
+                    <div class="flex gap-1">
+                        <a class="btn btn-secondary btn-sm" href="?action=canteen/menu&edit=<br />
+<b>Warning</b>:  Undefined array key "id" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>77</b><br />
+">Edit</a>
+                        <form method="post" action="http://localhost/SMEIC/public/index.php?action=canteen/menu-delete" class="inline" onsubmit="return confirmAction('Delete this item?')">
+                            <input type="hidden" name="csrf_token" value="a94ebf7e85f759cf53db4d566a3a3825d6da2ec266e4418a2c1cbb725bf69a6b"><input type="hidden" name="id" value="<br />
+<b>Warning</b>:  Undefined array key "id" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>79</b><br />
+">
+                            <button class="btn btn-danger btn-sm">×</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+            <div class="menu-card">
+            <img src="<br />
+<b>Warning</b>:  Undefined array key "image" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>54</b><br />
+http://localhost/SMEIC/public/assets/img/placeholder.png" class="menu-img" alt="">
+            <div class="menu-body">
+                <div class="flex items-center justify-between gap-2">
+                    <span class="badge badge-<br />
+<b>Warning</b>:  Undefined array key "category" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>57</b><br />
+"><br />
+<b>Warning</b>:  Undefined array key "category" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>57</b><br />
+</span>
+                    <span class="text-lg font-extrabold text-indigo-700 num"><br />
+<b>Warning</b>:  Undefined array key "price" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>58</b><br />
+₹0.00</span>
+                </div>
+                <div class="menu-name"><br />
+<b>Warning</b>:  Undefined array key "name" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>60</b><br />
+</div>
+                <div class="menu-desc"><br />
+<b>Warning</b>:  Undefined array key "description" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>61</b><br />
+</div>
+                <div class="flex items-center justify-between gap-1 mt-1">
+                    <form method="post" action="http://localhost/SMEIC/public/index.php?action=canteen/menu-save" class="inline">
+                        <input type="hidden" name="csrf_token" value="a94ebf7e85f759cf53db4d566a3a3825d6da2ec266e4418a2c1cbb725bf69a6b">                        <input type="hidden" name="id" value="<br />
+<b>Warning</b>:  Undefined array key "id" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>65</b><br />
+">
+                        <input type="hidden" name="name" value="<br />
+<b>Warning</b>:  Undefined array key "name" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>66</b><br />
+">
+                        <input type="hidden" name="description" value="<br />
+<b>Warning</b>:  Undefined array key "description" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>67</b><br />
+">
+                        <input type="hidden" name="price" value="<br />
+<b>Warning</b>:  Undefined array key "price" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>68</b><br />
+">
+                        <input type="hidden" name="category" value="<br />
+<b>Warning</b>:  Undefined array key "category" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>69</b><br />
+">
+                        <input type="hidden" name="existing_image" value="<br />
+<b>Warning</b>:  Undefined array key "image" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>70</b><br />
+">
+                        <input type="hidden" name="is_available" value="<br />
+<b>Warning</b>:  Undefined array key "is_available" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>71</b><br />
+1">
+                        <button class="badge <br />
+<b>Warning</b>:  Undefined array key "is_available" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>72</b><br />
+bg-red-100 text-red-700 cursor-pointer">
+                            <br />
+<b>Warning</b>:  Undefined array key "is_available" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>73</b><br />
+● Hidden                        </button>
+                    </form>
+                    <div class="flex gap-1">
+                        <a class="btn btn-secondary btn-sm" href="?action=canteen/menu&edit=<br />
+<b>Warning</b>:  Undefined array key "id" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>77</b><br />
+">Edit</a>
+                        <form method="post" action="http://localhost/SMEIC/public/index.php?action=canteen/menu-delete" class="inline" onsubmit="return confirmAction('Delete this item?')">
+                            <input type="hidden" name="csrf_token" value="a94ebf7e85f759cf53db4d566a3a3825d6da2ec266e4418a2c1cbb725bf69a6b"><input type="hidden" name="id" value="<br />
+<b>Warning</b>:  Undefined array key "id" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>79</b><br />
+">
+                            <button class="btn btn-danger btn-sm">×</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+            <div class="menu-card">
+            <img src="<br />
+<b>Warning</b>:  Undefined array key "image" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>54</b><br />
+http://localhost/SMEIC/public/assets/img/placeholder.png" class="menu-img" alt="">
+            <div class="menu-body">
+                <div class="flex items-center justify-between gap-2">
+                    <span class="badge badge-<br />
+<b>Warning</b>:  Undefined array key "category" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>57</b><br />
+"><br />
+<b>Warning</b>:  Undefined array key "category" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>57</b><br />
+</span>
+                    <span class="text-lg font-extrabold text-indigo-700 num"><br />
+<b>Warning</b>:  Undefined array key "price" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>58</b><br />
+₹0.00</span>
+                </div>
+                <div class="menu-name"><br />
+<b>Warning</b>:  Undefined array key "name" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>60</b><br />
+</div>
+                <div class="menu-desc"><br />
+<b>Warning</b>:  Undefined array key "description" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>61</b><br />
+</div>
+                <div class="flex items-center justify-between gap-1 mt-1">
+                    <form method="post" action="http://localhost/SMEIC/public/index.php?action=canteen/menu-save" class="inline">
+                        <input type="hidden" name="csrf_token" value="a94ebf7e85f759cf53db4d566a3a3825d6da2ec266e4418a2c1cbb725bf69a6b">                        <input type="hidden" name="id" value="<br />
+<b>Warning</b>:  Undefined array key "id" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>65</b><br />
+">
+                        <input type="hidden" name="name" value="<br />
+<b>Warning</b>:  Undefined array key "name" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>66</b><br />
+">
+                        <input type="hidden" name="description" value="<br />
+<b>Warning</b>:  Undefined array key "description" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>67</b><br />
+">
+                        <input type="hidden" name="price" value="<br />
+<b>Warning</b>:  Undefined array key "price" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>68</b><br />
+">
+                        <input type="hidden" name="category" value="<br />
+<b>Warning</b>:  Undefined array key "category" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>69</b><br />
+">
+                        <input type="hidden" name="existing_image" value="<br />
+<b>Warning</b>:  Undefined array key "image" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>70</b><br />
+">
+                        <input type="hidden" name="is_available" value="<br />
+<b>Warning</b>:  Undefined array key "is_available" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>71</b><br />
+1">
+                        <button class="badge <br />
+<b>Warning</b>:  Undefined array key "is_available" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>72</b><br />
+bg-red-100 text-red-700 cursor-pointer">
+                            <br />
+<b>Warning</b>:  Undefined array key "is_available" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>73</b><br />
+● Hidden                        </button>
+                    </form>
+                    <div class="flex gap-1">
+                        <a class="btn btn-secondary btn-sm" href="?action=canteen/menu&edit=<br />
+<b>Warning</b>:  Undefined array key "id" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>77</b><br />
+">Edit</a>
+                        <form method="post" action="http://localhost/SMEIC/public/index.php?action=canteen/menu-delete" class="inline" onsubmit="return confirmAction('Delete this item?')">
+                            <input type="hidden" name="csrf_token" value="a94ebf7e85f759cf53db4d566a3a3825d6da2ec266e4418a2c1cbb725bf69a6b"><input type="hidden" name="id" value="<br />
+<b>Warning</b>:  Undefined array key "id" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>79</b><br />
+">
+                            <button class="btn btn-danger btn-sm">×</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+            <div class="menu-card">
+            <img src="<br />
+<b>Warning</b>:  Undefined array key "image" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>54</b><br />
+http://localhost/SMEIC/public/assets/img/placeholder.png" class="menu-img" alt="">
+            <div class="menu-body">
+                <div class="flex items-center justify-between gap-2">
+                    <span class="badge badge-<br />
+<b>Warning</b>:  Undefined array key "category" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>57</b><br />
+"><br />
+<b>Warning</b>:  Undefined array key "category" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>57</b><br />
+</span>
+                    <span class="text-lg font-extrabold text-indigo-700 num"><br />
+<b>Warning</b>:  Undefined array key "price" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>58</b><br />
+₹0.00</span>
+                </div>
+                <div class="menu-name"><br />
+<b>Warning</b>:  Undefined array key "name" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>60</b><br />
+</div>
+                <div class="menu-desc"><br />
+<b>Warning</b>:  Undefined array key "description" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>61</b><br />
+</div>
+                <div class="flex items-center justify-between gap-1 mt-1">
+                    <form method="post" action="http://localhost/SMEIC/public/index.php?action=canteen/menu-save" class="inline">
+                        <input type="hidden" name="csrf_token" value="a94ebf7e85f759cf53db4d566a3a3825d6da2ec266e4418a2c1cbb725bf69a6b">                        <input type="hidden" name="id" value="<br />
+<b>Warning</b>:  Undefined array key "id" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>65</b><br />
+">
+                        <input type="hidden" name="name" value="<br />
+<b>Warning</b>:  Undefined array key "name" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>66</b><br />
+">
+                        <input type="hidden" name="description" value="<br />
+<b>Warning</b>:  Undefined array key "description" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>67</b><br />
+">
+                        <input type="hidden" name="price" value="<br />
+<b>Warning</b>:  Undefined array key "price" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>68</b><br />
+">
+                        <input type="hidden" name="category" value="<br />
+<b>Warning</b>:  Undefined array key "category" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>69</b><br />
+">
+                        <input type="hidden" name="existing_image" value="<br />
+<b>Warning</b>:  Undefined array key "image" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>70</b><br />
+">
+                        <input type="hidden" name="is_available" value="<br />
+<b>Warning</b>:  Undefined array key "is_available" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>71</b><br />
+1">
+                        <button class="badge <br />
+<b>Warning</b>:  Undefined array key "is_available" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>72</b><br />
+bg-red-100 text-red-700 cursor-pointer">
+                            <br />
+<b>Warning</b>:  Undefined array key "is_available" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>73</b><br />
+● Hidden                        </button>
+                    </form>
+                    <div class="flex gap-1">
+                        <a class="btn btn-secondary btn-sm" href="?action=canteen/menu&edit=<br />
+<b>Warning</b>:  Undefined array key "id" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>77</b><br />
+">Edit</a>
+                        <form method="post" action="http://localhost/SMEIC/public/index.php?action=canteen/menu-delete" class="inline" onsubmit="return confirmAction('Delete this item?')">
+                            <input type="hidden" name="csrf_token" value="a94ebf7e85f759cf53db4d566a3a3825d6da2ec266e4418a2c1cbb725bf69a6b"><input type="hidden" name="id" value="<br />
+<b>Warning</b>:  Undefined array key "id" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>79</b><br />
+">
+                            <button class="btn btn-danger btn-sm">×</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+            <div class="menu-card">
+            <img src="<br />
+<b>Warning</b>:  Undefined array key "image" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>54</b><br />
+http://localhost/SMEIC/public/assets/img/placeholder.png" class="menu-img" alt="">
+            <div class="menu-body">
+                <div class="flex items-center justify-between gap-2">
+                    <span class="badge badge-<br />
+<b>Warning</b>:  Undefined array key "category" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>57</b><br />
+"><br />
+<b>Warning</b>:  Undefined array key "category" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>57</b><br />
+</span>
+                    <span class="text-lg font-extrabold text-indigo-700 num"><br />
+<b>Warning</b>:  Undefined array key "price" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>58</b><br />
+₹0.00</span>
+                </div>
+                <div class="menu-name"><br />
+<b>Warning</b>:  Undefined array key "name" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>60</b><br />
+</div>
+                <div class="menu-desc"><br />
+<b>Warning</b>:  Undefined array key "description" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>61</b><br />
+</div>
+                <div class="flex items-center justify-between gap-1 mt-1">
+                    <form method="post" action="http://localhost/SMEIC/public/index.php?action=canteen/menu-save" class="inline">
+                        <input type="hidden" name="csrf_token" value="a94ebf7e85f759cf53db4d566a3a3825d6da2ec266e4418a2c1cbb725bf69a6b">                        <input type="hidden" name="id" value="<br />
+<b>Warning</b>:  Undefined array key "id" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>65</b><br />
+">
+                        <input type="hidden" name="name" value="<br />
+<b>Warning</b>:  Undefined array key "name" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>66</b><br />
+">
+                        <input type="hidden" name="description" value="<br />
+<b>Warning</b>:  Undefined array key "description" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>67</b><br />
+">
+                        <input type="hidden" name="price" value="<br />
+<b>Warning</b>:  Undefined array key "price" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>68</b><br />
+">
+                        <input type="hidden" name="category" value="<br />
+<b>Warning</b>:  Undefined array key "category" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>69</b><br />
+">
+                        <input type="hidden" name="existing_image" value="<br />
+<b>Warning</b>:  Undefined array key "image" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>70</b><br />
+">
+                        <input type="hidden" name="is_available" value="<br />
+<b>Warning</b>:  Undefined array key "is_available" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>71</b><br />
+1">
+                        <button class="badge <br />
+<b>Warning</b>:  Undefined array key "is_available" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>72</b><br />
+bg-red-100 text-red-700 cursor-pointer">
+                            <br />
+<b>Warning</b>:  Undefined array key "is_available" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>73</b><br />
+● Hidden                        </button>
+                    </form>
+                    <div class="flex gap-1">
+                        <a class="btn btn-secondary btn-sm" href="?action=canteen/menu&edit=<br />
+<b>Warning</b>:  Undefined array key "id" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>77</b><br />
+">Edit</a>
+                        <form method="post" action="http://localhost/SMEIC/public/index.php?action=canteen/menu-delete" class="inline" onsubmit="return confirmAction('Delete this item?')">
+                            <input type="hidden" name="csrf_token" value="a94ebf7e85f759cf53db4d566a3a3825d6da2ec266e4418a2c1cbb725bf69a6b"><input type="hidden" name="id" value="<br />
+<b>Warning</b>:  Undefined array key "id" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>79</b><br />
+">
+                            <button class="btn btn-danger btn-sm">×</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+            <div class="menu-card">
+            <img src="<br />
+<b>Warning</b>:  Undefined array key "image" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>54</b><br />
+http://localhost/SMEIC/public/assets/img/placeholder.png" class="menu-img" alt="">
+            <div class="menu-body">
+                <div class="flex items-center justify-between gap-2">
+                    <span class="badge badge-<br />
+<b>Warning</b>:  Undefined array key "category" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>57</b><br />
+"><br />
+<b>Warning</b>:  Undefined array key "category" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>57</b><br />
+</span>
+                    <span class="text-lg font-extrabold text-indigo-700 num"><br />
+<b>Warning</b>:  Undefined array key "price" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>58</b><br />
+₹0.00</span>
+                </div>
+                <div class="menu-name"><br />
+<b>Warning</b>:  Undefined array key "name" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>60</b><br />
+</div>
+                <div class="menu-desc"><br />
+<b>Warning</b>:  Undefined array key "description" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>61</b><br />
+</div>
+                <div class="flex items-center justify-between gap-1 mt-1">
+                    <form method="post" action="http://localhost/SMEIC/public/index.php?action=canteen/menu-save" class="inline">
+                        <input type="hidden" name="csrf_token" value="a94ebf7e85f759cf53db4d566a3a3825d6da2ec266e4418a2c1cbb725bf69a6b">                        <input type="hidden" name="id" value="<br />
+<b>Warning</b>:  Undefined array key "id" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>65</b><br />
+">
+                        <input type="hidden" name="name" value="<br />
+<b>Warning</b>:  Undefined array key "name" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>66</b><br />
+">
+                        <input type="hidden" name="description" value="<br />
+<b>Warning</b>:  Undefined array key "description" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>67</b><br />
+">
+                        <input type="hidden" name="price" value="<br />
+<b>Warning</b>:  Undefined array key "price" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>68</b><br />
+">
+                        <input type="hidden" name="category" value="<br />
+<b>Warning</b>:  Undefined array key "category" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>69</b><br />
+">
+                        <input type="hidden" name="existing_image" value="<br />
+<b>Warning</b>:  Undefined array key "image" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>70</b><br />
+">
+                        <input type="hidden" name="is_available" value="<br />
+<b>Warning</b>:  Undefined array key "is_available" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>71</b><br />
+1">
+                        <button class="badge <br />
+<b>Warning</b>:  Undefined array key "is_available" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>72</b><br />
+bg-red-100 text-red-700 cursor-pointer">
+                            <br />
+<b>Warning</b>:  Undefined array key "is_available" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>73</b><br />
+● Hidden                        </button>
+                    </form>
+                    <div class="flex gap-1">
+                        <a class="btn btn-secondary btn-sm" href="?action=canteen/menu&edit=<br />
+<b>Warning</b>:  Undefined array key "id" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>77</b><br />
+">Edit</a>
+                        <form method="post" action="http://localhost/SMEIC/public/index.php?action=canteen/menu-delete" class="inline" onsubmit="return confirmAction('Delete this item?')">
+                            <input type="hidden" name="csrf_token" value="a94ebf7e85f759cf53db4d566a3a3825d6da2ec266e4418a2c1cbb725bf69a6b"><input type="hidden" name="id" value="<br />
+<b>Warning</b>:  Undefined array key "id" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>79</b><br />
+">
+                            <button class="btn btn-danger btn-sm">×</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+            <div class="menu-card">
+            <img src="<br />
+<b>Warning</b>:  Undefined array key "image" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>54</b><br />
+http://localhost/SMEIC/public/assets/img/placeholder.png" class="menu-img" alt="">
+            <div class="menu-body">
+                <div class="flex items-center justify-between gap-2">
+                    <span class="badge badge-<br />
+<b>Warning</b>:  Undefined array key "category" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>57</b><br />
+"><br />
+<b>Warning</b>:  Undefined array key "category" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>57</b><br />
+</span>
+                    <span class="text-lg font-extrabold text-indigo-700 num"><br />
+<b>Warning</b>:  Undefined array key "price" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>58</b><br />
+₹0.00</span>
+                </div>
+                <div class="menu-name"><br />
+<b>Warning</b>:  Undefined array key "name" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>60</b><br />
+</div>
+                <div class="menu-desc"><br />
+<b>Warning</b>:  Undefined array key "description" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>61</b><br />
+</div>
+                <div class="flex items-center justify-between gap-1 mt-1">
+                    <form method="post" action="http://localhost/SMEIC/public/index.php?action=canteen/menu-save" class="inline">
+                        <input type="hidden" name="csrf_token" value="a94ebf7e85f759cf53db4d566a3a3825d6da2ec266e4418a2c1cbb725bf69a6b">                        <input type="hidden" name="id" value="<br />
+<b>Warning</b>:  Undefined array key "id" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>65</b><br />
+">
+                        <input type="hidden" name="name" value="<br />
+<b>Warning</b>:  Undefined array key "name" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>66</b><br />
+">
+                        <input type="hidden" name="description" value="<br />
+<b>Warning</b>:  Undefined array key "description" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>67</b><br />
+">
+                        <input type="hidden" name="price" value="<br />
+<b>Warning</b>:  Undefined array key "price" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>68</b><br />
+">
+                        <input type="hidden" name="category" value="<br />
+<b>Warning</b>:  Undefined array key "category" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>69</b><br />
+">
+                        <input type="hidden" name="existing_image" value="<br />
+<b>Warning</b>:  Undefined array key "image" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>70</b><br />
+">
+                        <input type="hidden" name="is_available" value="<br />
+<b>Warning</b>:  Undefined array key "is_available" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>71</b><br />
+1">
+                        <button class="badge <br />
+<b>Warning</b>:  Undefined array key "is_available" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>72</b><br />
+bg-red-100 text-red-700 cursor-pointer">
+                            <br />
+<b>Warning</b>:  Undefined array key "is_available" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>73</b><br />
+● Hidden                        </button>
+                    </form>
+                    <div class="flex gap-1">
+                        <a class="btn btn-secondary btn-sm" href="?action=canteen/menu&edit=<br />
+<b>Warning</b>:  Undefined array key "id" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>77</b><br />
+">Edit</a>
+                        <form method="post" action="http://localhost/SMEIC/public/index.php?action=canteen/menu-delete" class="inline" onsubmit="return confirmAction('Delete this item?')">
+                            <input type="hidden" name="csrf_token" value="a94ebf7e85f759cf53db4d566a3a3825d6da2ec266e4418a2c1cbb725bf69a6b"><input type="hidden" name="id" value="<br />
+<b>Warning</b>:  Undefined array key "id" in <b>C:\xampp\htdocs\SMEIC\views\canteen\menu.php</b> on line <b>79</b><br />
+">
+                            <button class="btn btn-danger btn-sm">×</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+</div><!-- /app-main -->
+
+<footer class="app-footer">
+    &copy; 2026 SMEIC - School Canteen &middot; Developed by team SMEIC
+</footer>
+
+<div id="toast-container" class="toast-container"></div>
+<div id="sidebar-backdrop" class="sidebar-backdrop hidden" style="display:none" onclick="closeSidebar()"></div>
+
+<script src="http://localhost/SMEIC/public/assets/js/app.js"></script>
+<script src="http://localhost/SMEIC/public/assets/js/notifications.js"></script>
+<script>
+function closeSidebar() {
+    document.getElementById('sidebar')?.classList.remove('open');
+    document.getElementById('sidebar-backdrop')?.classList.add('hidden');
+}
+function openSidebar() {
+    document.getElementById('sidebar')?.classList.add('open');
+    document.getElementById('sidebar-backdrop')?.classList.remove('hidden');
+}
+document.getElementById('sidebarToggle')?.addEventListener('click', function () {
+    const sb = document.getElementById('sidebar');
+    if (sb?.classList.contains('open')) closeSidebar(); else openSidebar();
+});
+</script>
+</body>
+</html>
+

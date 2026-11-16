@@ -1,0 +1,10 @@
+# /public/.htaccess — disable directory listing, allow direct file access
+Options -Indexes
+
+# Default index
+DirectoryIndex index.php
+
+# Deny access to sensitive files
+<FilesMatch "\.(env|sql|log|md|ini|yml|yaml)$">
+    Require all denied
+</FilesMatch>

@@ -1,0 +1,1480 @@
+================================================================================
+SMEIC - University Canteen Management System
+================================================================================
+Complete Backend Documentation — Written for Beginners
+================================================================================
+
+Welcome! This document explains the entire backend of the SMEIC project in simple,
+easy-to-understand language. Even if you are not a programmer, you should be able
+to follow along and understand how everything works.
+
+TABLE OF CONTENTS:
+  1.  What is this project?
+  2.  How does the backend work? (The Big Picture)
+  3.  What technologies are used?
+  4.  Folder-by-folder breakdown
+  5.  How requests flow through the system
+  6.  How login and authentication works
+  7.  How sessions work
+  8.  How CSRF protection works
+  9.  How passwords are stored
+  10. How the database works
+  11. How money (wallet) operations work
+  12. How orders work (Order Lifecycle)
+  13. How notifications work
+  14. How file uploads work
+  15. How QR codes and pickup tokens work
+  16. How the API endpoints work
+  17. How security is handled
+  18. All the helper functions explained
+  19. How to add new features
+  20. Common problems and solutions
+  21. Developer credits
+
+
+================================================================================
+1. WHAT IS THIS PROJECT?
+================================================================================
+
+SMEIC stands for "School Canteen Management System." It is a website that
+helps schools manage their canteen (cafeteria/food court). Think of it like
+a mini-Amazon, but specifically for school food.
+
+It has FOUR types of users:
+
+  ADMIN          → The school staff who manages everything
+  STUDENT        → The students who order food
+  PARENT         → The parents who put money in their child's wallet
+  CANTEEN STAFF  → The people who cook and serve the food
+
+Each type of user sees a DIFFERENT dashboard when they log in. This is called
+"Role-Based Access Control" — meaning what you can see and do depends on your
+role (admin, student, parent, or canteen staff).
+
+WHY WAS THIS BUILT?
+  → To replace paper-based canteen systems
+  → To let parents track what their children eat
+  → To let students order food without standing in line
+  → To help canteen staff manage orders efficiently
+  → To give admins a bird's-eye view of everything
+
+
+================================================================================
+2. HOW DOES THE BACKEND WORK? (THE BIG PICTURE)
+================================================================================
+
+Imagine the backend like a restaurant:
+
+  1. A CUSTOMER (your browser) places an ORDER (sends a request)
+  2. The WAITER (public/index.php) takes the order
+  3. The waiter sends it to the right CHEF (Controller) based on what you ordered
+  4. The CHEF prepares the dish (talks to the database)
+  5. The dish is served back to you (HTML page or JSON response)
+
+In technical terms:
+
+  BROWSER → sends HTTP request → public/index.php (front controller)
+  → reads the "action" parameter → calls the right Controller method
+  → Controller talks to MySQL database using PDO
+  → Controller renders a PHP view file (the HTML page you see)
+  → Response is sent back to your browser
+
+The KEY concept is: EVERYTHING goes through ONE file — public/index.php.
+This file is called the "Front Controller." It's like the main reception
+desk of a hotel — every request passes through it.
+
+Here is a simplified version of what happens (in code):
+
+  // This is in public/index.php
+  $action = $_GET['action'] ?? 'home';   // What page did the user want?
+
+  switch ($action) {
+      case 'login':
+          (new AuthController())->login();      // Show login page
+          break;
+      case 'student/dashboard':
+          (new StudentController())->dashboard(); // Show student dashboard
+          break;
+      case 'student/cart':
+          (new StudentController())->cart();      // Show student cart
+          break;
+      // ... hundreds more routes
+  }
+
+So when you visit:
+  http://localhost/SMEIC/public/index.php?action=student/cart
+
+The system reads "student/cart" and calls the StudentController's cart() method.
+That method fetches the cart items from the database and renders the cart page.
+
+WHAT IS A CONTROLLER?
+  A Controller is a PHP file that contains the business logic. Think of it as
+  the "brain" for a specific section. For example:
+    - AuthController handles login, logout, password changes
+    - StudentController handles everything students do
+    - AdminController handles everything admins do
+    - CanteenController handles everything canteen staff do
+    - ParentController handles everything parents do
+
+WHAT IS A VIEW?
+  A View is a PHP file that contains HTML (the visual part of the page).
+  Views are like templates — they display data that the Controller gives them.
+  For example, views/student/dashboard.php shows the student dashboard.
+
+
+================================================================================
+3. WHAT TECHNOLOGIES ARE USED?
+================================================================================
+
+Let's break down every technology and WHY it's used:
+
+PHP 8.0+
+  WHAT: A server-side programming language. This is the MAIN language of the backend.
+  WHY:  It's simple, widely supported, and runs on almost any hosting server.
+  NOTE: We use plain PHP — no framework like Laravel. This keeps it simple.
+
+MySQL 5.7+ (or MariaDB 10.3+)
+  WHAT: A database system. It stores all the data — users, orders, menu items, etc.
+  WHY:  It's reliable, fast, and free. Works perfectly with PHP.
+  NOTE: The database is called "smeic_canteen" and has 19 tables.
+
+PDO (PHP Data Objects)
+  WHAT: A PHP feature that lets you talk to databases safely.
+  WHY:  It uses "prepared statements" which PREVENT hackers from injecting
+        malicious SQL code (this is called SQL Injection prevention).
+  HOW:  Every single database query in this project uses PDO. We NEVER
+        concatenate (join) user input into SQL strings. This is the most
+        important security practice in the entire codebase.
+
+Apache 2.4 (via XAMPP)
+  WHAT: The web server that receives HTTP requests and sends responses.
+  WHY:  XAMPP bundles Apache + MySQL + PHP together, making local development easy.
+  HOW:  The .htaccess files tell Apache which files to allow/block.
+
+TailwindCSS (via CDN)
+  WHAT: A CSS framework that makes styling web pages fast and easy.
+  WHY:  Instead of writing thousands of lines of CSS from scratch, we use
+        Tailwind's pre-built classes like "bg-blue-500" or "rounded-lg".
+  CDN:  We load it from a CDN (content delivery network) so no installation needed.
+
+Vanilla JavaScript (no React/Vue/jQuery)
+  WHAT: Plain JavaScript without any framework.
+  WHY:  Keeps things simple. We use it for AJAX calls, sidebar toggling,
+        and notification polling.
+
+Chart.js 4.4
+  WHAT: A JavaScript library for creating charts and graphs.
+  WHY:  Used on dashboards to show things like "orders per week" or
+        "monthly revenue" as nice visual charts.
+
+Composer
+  WHAT: A tool for installing PHP libraries (like npm for JavaScript).
+  WHY:  We use it for optional features like PDF generation and QR codes.
+  NOTE: The app works WITHOUT Composer — it just falls back to simpler alternatives.
+
+chillerlan/php-qrcode (optional)
+  WHAT: A library that generates QR codes in PHP.
+  WHY:  Used to generate QR codes for order pickup tokens offline.
+
+dompdf (optional)
+  WHAT: A library that converts HTML to PDF.
+  WHY:  Used for generating PDF reports in the admin panel.
+
+phpmailer (optional)
+  WHAT: A library for sending emails from PHP.
+  WHY:  Used for password reset emails. Currently writes to a log file instead.
+
+
+================================================================================
+4. FOLDER-BY-FOLDER BREAKDOWN
+================================================================================
+
+Let's go through every folder and explain what each file does:
+
+┌─────────────────────────────────────────────────────────────────┐
+│  config/                                                       │
+│  This folder contains all the configuration/settings files.     │
+│  IMPORTANT: This folder is BLOCKED from direct web access.      │
+│  Only PHP code can read these files — browsers cannot.          │
+└─────────────────────────────────────────────────────────────────┘
+
+config/constants.php
+  WHAT: Stores all the app settings in one place.
+  CONTAINS:
+    - APP_NAME: 'SMEIC - School Canteen' (the name of the app)
+    - BASE_URL: 'http://localhost/SMEIC/public' (the main URL)
+    - CURRENCY: '₹' (Indian Rupee symbol)
+    - SESSION_NAME: 'SMEIC_SESSID' (the name of the session cookie)
+    - SESSION_LIFETIME: 14400 seconds (4 hours — auto-logout time)
+    - TOKEN_LENGTH: 6 (pickup tokens are 6 digits)
+    - TOKEN_EXPIRY_HOURS: 24 (tokens expire after 24 hours)
+    - LOW_BALANCE_THRESHOLD: 50 (warning when wallet < ₹50)
+    - Timezone: Asia/Kolkata
+  WHY:  Having all settings in one file makes it easy to change things.
+        Want to change the currency? Edit one line here.
+
+config/database.php
+  WHAT: Connects to the MySQL database.
+  HOW:  Uses a "singleton" pattern — meaning it creates ONE connection and
+        reuses it everywhere. The db() function returns this connection.
+  CODE EXPLANATION:
+    $pdo = new PDO(
+        "mysql:host=127.0.0.1;dbname=smeic_canteen;charset=utf8mb4",
+        "root",    // database username
+        "",        // database password (empty for XAMPP)
+        [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,  // Show errors
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC, // Fetch as array
+            PDO::ATTR_EMULATE_PREPARES => false,  // Use real prepared statements
+        ]
+    );
+  ALSO: Contains smeic_run_schema_migrations() — a function that automatically
+        adds missing columns/tables when the app starts. This means you can
+        upgrade the database without manually running SQL commands.
+
+config/functions.php (394 lines — THE MOST IMPORTANT FILE)
+  WHAT: Contains ALL the helper functions used throughout the app.
+  WHY:  Instead of repeating the same code everywhere, we write it once here.
+  KEY FUNCTIONS (explained later in section 18):
+    - e()              → Makes text safe for HTML display (prevents XSS)
+    - url()            → Creates links relative to the base URL
+    - redirect()       → Sends the user to a different page
+    - csrf_token()     → Generates a security token
+    - csrf_field()     → Creates a hidden form field with the token
+    - csrf_check()     → Validates the token on form submission
+    - current_user()   → Gets info about the logged-in user
+    - require_login()  → Forces the user to be logged in
+    - require_role()   → Forces the user to have a specific role
+    - flash_set/get()  → Shows one-time success/error messages
+    - notify()         → Sends an in-app notification
+    - audit()          → Logs admin actions
+    - generate_id()    → Creates S##### or P##### IDs
+
+┌─────────────────────────────────────────────────────────────────┐
+│  controllers/                                                   │
+│  This folder contains the "brains" of each section.             │
+│  Each file is a PHP class with methods for each page/action.    │
+└─────────────────────────────────────────────────────────────────┘
+
+controllers/AuthController.php (377 lines)
+  WHAT: Handles everything related to logging in and out.
+  METHODS:
+    - login()          → Shows login form / verifies credentials
+    - logout()         → Destroys the session and redirects to login
+    - changePassword() → Forces users to set a new password
+    - forgotPassword() → Sends a password reset link
+    - resetPassword()  → Lets user set a new password using the reset link
+  SECURITY:
+    - Uses password_verify() to check bcrypt hashes
+    - Regenerates session ID on login (prevents session hijacking)
+    - Stores passwords as bcrypt hashes (never plain text)
+
+controllers/StudentController.php (360 lines)
+  WHAT: Handles everything students do.
+  METHODS:
+    - dashboard()      → Shows balance, spending, behavior score
+    - menu()           → Browse menu with categories
+    - cart()           → View shopping cart
+    - checkout()       → Place order (MOST COMPLEX — handles money)
+    - orders()         → View order history
+    - orderTracking()  → Live order status with timeline
+    - token()          → Shows QR code / pickup token
+    - markPickedUp()   → Confirm order collected
+    - notifications()  → View notifications
+    - feedback()       → Rate an order (1-5 stars)
+    - profile()        → View profile
+
+controllers/AdminController.php (489 lines)
+  WHAT: Handles everything admins do.
+  METHODS:
+    - dashboard()      → KPI overview with charts
+    - students()       → List students (with search)
+    - studentSave()    → Create or update a student
+    - studentDelete()  → Soft-delete a student
+    - studentReset()   → Reset student password
+    - parents()        → List parents
+    - parentSave()     → Create or update a parent
+    - topup()          → Add money to a wallet
+    - orders()         → View all orders (with filters)
+    - transactions()   → View all transactions
+    - menu()           → View menu (read-only)
+    - reports()        → Summary statistics
+    - audit()          → View admin action log
+    - export()         → Download CSV/PDF reports
+
+controllers/ParentController.php (210 lines)
+  WHAT: Handles everything parents do.
+  METHODS:
+    - dashboard()      → See own wallet + child's wallet
+    - transfer()       → Send money to child
+    - menu()           → Browse canteen menu
+    - preferences()    → Send meal suggestions to child
+    - childOrders()    → View child's order history
+    - orderDetail()    → View a specific order
+    - notifications()  → View notifications
+    - profile()        → View profile
+
+controllers/CanteenController.php (504 lines)
+  WHAT: Handles everything canteen staff do.
+  METHODS:
+    - dashboard()      → Today's earnings, orders, top sellers
+    - orders()         → Manage incoming orders
+    - acceptOrder()    → Accept order with prep time
+    - markReady()      → Mark food as ready
+    - markPickedUp()   → Mark order as collected
+    - cancelOrder()    → Cancel order (auto-refunds money)
+    - scanPickup()     → Verify pickup token
+    - menu()           → View menu items
+    - menuSave()       → Add/edit menu item (with image upload)
+    - menuDelete()     → Delete a menu item
+    - dailySpecial()   → Set today's special item
+    - earnings()       → View earnings reports
+    - staff()          → Manage staff accounts (manager only)
+    - profile()        → View profile
+
+┌─────────────────────────────────────────────────────────────────┐
+│  views/                                                        │
+│  This folder contains the HTML pages (what the user sees).      │
+│  Each file is a mix of PHP and HTML.                            │
+└─────────────────────────────────────────────────────────────────┘
+
+views/layouts/
+  header.php    → The top bar (logo, sidebar toggle, user info, bell icon)
+  sidebar.php   → The navigation menu (adapts based on user role)
+  footer.php    → The bottom part + JavaScript for sidebar toggle
+
+views/auth/
+  login.php           → The login page with role tabs
+  change-password.php → Forced password change form
+  forgot-password.php → Request a password reset
+  reset-password.php  → Set new password via link
+
+views/admin/          → One file per admin page (dashboard, students, parents, etc.)
+views/student/        → One file per student page (menu, cart, orders, etc.)
+views/parent/         → One file per parent page (transfer, preferences, etc.)
+views/canteen/        → One file per canteen page (orders, menu, earnings, etc.)
+
+┌─────────────────────────────────────────────────────────────────┐
+│  public/                                                       │
+│  This is the ONLY folder accessible via the web browser.        │
+│  Everything else is blocked by .htaccess.                       │
+└─────────────────────────────────────────────────────────────────┘
+
+public/index.php (348 lines)
+  WHAT: The front controller — the ENTRY POINT for every request.
+  HOW:  Reads the "action" parameter from the URL and routes to the
+        correct controller method.
+
+public/.htaccess
+  WHAT: Apache configuration that disables directory listing (people can't
+        browse your folders) and blocks sensitive files.
+
+public/generate_hashes.php
+  WHAT: A one-time utility script. Run it ONCE to set real bcrypt passwords
+        for the demo accounts. Then you can delete it.
+
+public/clear_force_change.php
+  WHAT: Another one-time utility. Clears the "force password change" flag
+        if you get stuck on the password change screen.
+
+public/assets/css/style.css (1,276 lines)
+  WHAT: The custom CSS design system. Defines colors, buttons, cards,
+        forms, tables, and all the visual styling.
+
+public/assets/js/app.js (165 lines)
+  WHAT: Shared JavaScript. Contains:
+    - smeicAjax()    → Helper function for AJAX requests
+    - Toast system   → Pop-up notifications
+    - Password eye   → Show/hide password toggle
+    - Cart badge     → Updates the cart count in the sidebar
+
+public/assets/js/notifications.js (35 lines)
+  WHAT: Polls the server every 10 seconds to check for new notifications.
+        Also checks for pickup reminders every 60 seconds.
+
+public/assets/uploads/menu/
+  WHAT: Stores images uploaded by canteen staff for menu items.
+  SECURITY: Only image files are accepted (validated by MIME type).
+
+public/api/
+  WHAT: JSON-only endpoints for AJAX calls. These return DATA, not HTML pages.
+  FILES:
+    _bootstrap.php              → Shared setup for all API endpoints
+    update-cart.php             → Add/change/remove cart items
+    transfer-funds.php          → Parent transfers money to child
+    check-notifications.php     → Get unread notification count
+    mark-notification-read.php  → Mark notifications as read
+    get-order-status.php        → Get live order status
+    check-pickup-reminders.php  → Send pickup reminders
+    mark-ready-pickup-reminder.php → Manual pickup reminder trigger
+
+┌─────────────────────────────────────────────────────────────────┐
+│  Other Folders                                                 │
+└─────────────────────────────────────────────────────────────────┘
+
+logs/
+  error.log      → Application error messages
+  php_error.log  → PHP error messages
+  mail.log       → Password reset emails (written here instead of sending)
+
+exports/
+  Stores generated CSV and PDF reports.
+
+vendor/
+  Contains Composer packages (dompdf, phpmailer, qrcode).
+  This folder is auto-generated by running "composer install".
+
+database.sql
+  The COMPLETE database structure (all 19 tables) and sample data.
+  Import this into MySQL to set up the database.
+
+
+================================================================================
+5. HOW REQUESTS FLOW THROUGH THE SYSTEM
+================================================================================
+
+Let's trace what happens when a student adds an item to their cart:
+
+STEP 1: Student clicks "Add to Cart" button on the menu page
+  → JavaScript function smeicAjax() is called
+
+STEP 2: JavaScript sends an AJAX POST request to:
+  → public/api/update-cart.php
+
+STEP 3: update-cart.php includes _bootstrap.php (sets up session, headers)
+  → Checks: Is the user logged in? Is this a student?
+  → Checks: Does the CSRF token match?
+  → Reads the item ID and quantity from the request
+
+STEP 4: Database operation:
+  → $pdo->prepare("INSERT INTO carts (student_id, menu_item_id, quantity) 
+                    VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE quantity = ?")
+  → This is a PREPARED STATEMENT — the ? marks are filled in safely
+  → No user input is ever directly put into SQL queries
+
+STEP 5: Response:
+  → Returns JSON: { "ok": true, "quantity": 2, "cart_count": 3 }
+  → The JavaScript updates the cart badge number in the sidebar
+
+STEP 6: Student sees:
+  → The cart badge now shows "3" (total items in cart)
+  → A toast notification appears: "Added to cart!"
+
+THIS IS THE COMPLETE FLOW FOR EVERY ACTION IN THE APP:
+  Browser → Front Controller → Controller Method → Database → Response → Browser
+
+
+================================================================================
+6. HOW LOGIN AND AUTHENTICATION WORKS
+================================================================================
+
+When someone tries to log in, here's exactly what happens:
+
+STEP 1: User enters their login info and clicks "Login"
+  → The form sends a POST request to: index.php?action=login
+
+STEP 2: AuthController::login() runs:
+  → Reads the "role" (admin/student/parent/canteen) and "identifier" (email/ID)
+  → Looks up the user in the CORRECT table based on role:
+      admin   → users table WHERE email = ?
+      student → students table WHERE student_id = ?
+      parent  → parents table WHERE parent_id = ? OR email = ?
+      canteen → users table WHERE email = ? AND role = 'canteen'
+
+STEP 3: Password check:
+  → password_verify($_POST['password'], $row['password'])
+  → This compares the entered password against the stored bcrypt hash
+  → bcrypt is a ONE-WAY hash — you can't reverse it to get the password
+  → Example: "Admin@123" might be stored as "$2y$10$xK9..."
+  → password_verify() knows how to check if "Admin@123" matches that hash
+
+STEP 4: On successful login:
+  → session_regenerate_id(true)  ← Creates a NEW session ID
+      WHY?  Prevents "session fixation" attacks where an attacker
+            sets your session ID before you log in
+  → Stores user info in $_SESSION:
+      $_SESSION['user_id']    = the user's ID
+      $_SESSION['role']       = 'student' / 'admin' / 'parent' / 'canteen'
+      $_SESSION['name']       = the user's name
+      $_SESSION['force_change'] = 1 if they need to change password
+
+STEP 5: Redirect:
+  → If force_change = 1 → redirect to change-password page
+  → Otherwise → redirect to their dashboard
+
+WHAT IF THE PASSWORD IS WRONG?
+  → Shows "Invalid login credentials" error
+  → Does NOT tell the attacker WHICH part was wrong (email or password)
+  → This is a security best practice
+
+WHAT ABOUT FORCE PASSWORD CHANGE?
+  → All demo accounts have force_password_change = 1
+  → After first login, the user MUST change their password
+  → Until they do, they CANNOT access any other page
+  → This is enforced by this code in public/index.php:
+
+  if (!empty($_SESSION['user_id']) && (int)$_SESSION['force_change'] === 1) {
+      if (!in_array($action, ['change-password', 'logout', 'login'], true)) {
+          redirect(url('index.php?action=change-password'));
+      }
+  }
+
+
+================================================================================
+7. HOW SESSIONS WORK
+================================================================================
+
+A "session" is like a temporary memory that the server keeps for each logged-in
+user. It's how the server remembers who you are as you move from page to page.
+
+HOW IT WORKS:
+  1. When you log in, the server creates a SESSION FILE on the server
+  2. It sends your browser a COOKIE (a small piece of data) with a session ID
+  3. Every time you visit a new page, your browser sends that cookie back
+  4. The server reads the session ID, finds your session file, and knows it's YOU
+
+SESSION SETTINGS (in config/functions.php):
+  session_name('SMEIC_SESSID');        // Custom name (not the default PHPSESSID)
+  session lifetime = 4 hours           // Auto-logout after 4 hours
+  httponly = true                      // JavaScript can't read the cookie
+  samesite = 'Lax'                    // Prevents CSRF attacks
+
+  WHY httponly?  If a hacker injects malicious JavaScript (XSS attack), they
+                 can't steal your session cookie because JavaScript can't see it.
+
+  WHY SameSite=Lax?  When you click a link from another website, your session
+                      cookie is NOT sent. This prevents CSRF attacks.
+
+SESSION KEYS STORED:
+  user_id      → Your unique ID
+  role         → 'admin', 'student', 'parent', or 'canteen'
+  name         → Your display name
+  username     → Your username (for canteen staff)
+  force_change → 1 if you must change password, 0 if not
+  csrf_token   → Your security token for this session
+  flash        → Temporary success/error messages
+
+HELPER FUNCTIONS:
+  current_user()     → Returns all your session info, or null if not logged in
+  require_login()    → Redirects to login page if not logged in
+  require_role()     → Redirects if you don't have the right role
+
+
+================================================================================
+8. HOW CSRF PROTECTION WORKS
+================================================================================
+
+CSRF stands for "Cross-Site Request Forgery." It's an attack where a hacker
+tricks you into performing an action you didn't intend to.
+
+EXAMPLE OF A CSRF ATTACK:
+  1. You are logged into SMEIC
+  2. You visit a malicious website
+  3. That website has a hidden form that automatically submits a request to
+     transfer money from your wallet to the hacker's account
+  4. Your browser sends the request WITH your session cookie
+  5. SMEIC thinks YOU made the request — and transfers the money!
+
+HOW WE PREVENT IT:
+
+  STEP 1: When you log in, the server generates a random TOKEN:
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    // Example: "a3f8b2c1d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9..."
+
+  STEP 2: Every form on the site includes this token as a hidden field:
+    <input type="hidden" name="csrf_token" value="a3f8b2c1d4e5f6...">
+
+  STEP 3: When you submit the form, the server checks:
+    if (hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+        // Token matches — this is a legitimate request
+    } else {
+        // Token doesn't match — REJECT the request
+    }
+
+  WHY hash_equals()?  It's a "constant-time" comparison function. Regular
+  string comparison (==) can leak information about the token through
+  timing differences. hash_equals() always takes the same amount of time
+  regardless of where the strings differ.
+
+  FOR AJAX CALLS:  JavaScript sends the token in a header:
+    X-CSRF-Token: a3f8b2c1d4e5f6...
+
+
+================================================================================
+9. HOW PASSWORDS ARE STORED
+================================================================================
+
+NEVER store passwords as plain text. If someone hacks your database, they'd
+see every user's password. Instead, we use HASHING.
+
+WHAT IS HASHING?
+  Hashing is a ONE-WAY transformation. You can turn a password INTO a hash,
+  but you CANNOT turn a hash BACK into a password.
+
+  Plain text:  "Admin@123"
+  Bcrypt hash: "$2y$10$xK9Z8Q7W6E5R4T3Y2U1I0O9P8L7K6J5H4G3F2D1S0A9Z8X7C6V5"
+
+  When someone logs in with "Admin@123", PHP calculates the hash and
+  compares it to the stored hash. If they match, the password is correct.
+
+THE CODE:
+  // To store a password:
+  $hash = password_hash('Admin@123', PASSWORD_BCRYPT);
+  // Cost factor: 10 (default, good balance of speed and security)
+
+  // To verify a password:
+  password_verify('Admin@123', $stored_hash);  // Returns true or false
+
+WHERE PASSWORDS ARE STORED:
+  The same password is stored in TWO places (kept in sync):
+    1. students.password    (for students)
+    2. parents.password     (for parents)
+    3. canteen_staff.password (for canteen staff)
+    4. users.password       (mirror for admin, parent, canteen)
+
+  WHY TWO PLACES?  Because the login system checks the "users" table first,
+  then looks up extra details in the role-specific table. Both need the
+  password hash for verification to work.
+
+WHAT IS BCRYPT?
+  Bcrypt is a specific hashing algorithm designed for passwords.
+  - It's SLOW (by design) — makes brute-force attacks impractical
+  - It includes a SALT (random data) — prevents rainbow table attacks
+  - The cost factor (10) means it does 2^10 = 1024 rounds of hashing
+  - Each hash is UNIQUE even for the same password
+
+
+================================================================================
+10. HOW THE DATABASE WORKS
+================================================================================
+
+The database is called "smeic_canteen" and contains 19 tables. Think of each
+table like an Excel spreadsheet with rows and columns.
+
+ALL 19 TABLES EXPLAINED:
+
+1. users
+   Stores login accounts for admin, parent, and canteen staff.
+   Columns: id, role (admin/parent/canteen), email, password, force_password_change, is_active
+   WHY:  A central place to check login credentials for these three roles.
+
+2. students
+   Stores student profiles.
+   Columns: id, student_id (S10001), full_name, class_name, roll_no, behavioral_score, parent_id, password
+   WHY:  Each student has their own account linked to a parent.
+
+3. parents
+   Stores parent profiles.
+   Columns: id, parent_id (P10001), full_name, email, phone, address, wallet_balance, password
+   WHY:  Parents manage their child's wallet and track spending.
+
+4. canteen_staff
+   Stores canteen staff accounts.
+   Columns: id, full_name, email, username, password, role (manager/staff), permissions
+   WHY:  Different staff members can have different permissions.
+
+5. wallets
+   Stores student wallet balances.
+   Columns: student_id (unique), balance
+   WHY:  Each student has exactly one wallet with a balance.
+
+6. transactions
+   Records every money movement (credit or debit).
+   Columns: user_id, user_type, amount, type (credit/debit), reference, balance_after
+   WHY:  Complete financial history — like a bank statement.
+
+7. orders
+   Stores food orders.
+   Columns: student_id, order_number, total_amount, status, pickup_token, timestamps
+   WHY:  Tracks every order from placement to pickup.
+
+8. order_items
+   Stores individual items in each order.
+   Columns: order_id, menu_item_id, quantity, price
+   WHY:  One order can have multiple items. This stores each one.
+
+9. menu_items
+   The canteen menu.
+   Columns: name, description, price, category, image, is_available
+   WHY:  All the food items available for ordering.
+
+10. daily_specials
+    Today's highlighted item.
+    Columns: menu_item_id, special_date, expires_at, is_active
+    WHY:  One item per day gets a "Special" badge.
+
+11. carts
+    Active student shopping carts.
+    Columns: student_id, menu_item_id, quantity
+    WHY:  Temporarily holds items before checkout.
+
+12. notifications
+    In-app notifications.
+    Columns: user_id, user_type, title, message, is_read
+    WHY:  "Your order is ready!", "Money transferred", etc.
+
+13. feedback
+    Student ratings on orders.
+    Columns: student_id, order_id, rating (1-5), comment
+    WHY:  Lets students rate their food experience.
+
+14. password_resets
+    Password reset tokens.
+    Columns: email, token, expires_at
+    WHY:  Temporary tokens for the "Forgot Password" feature.
+
+15. audit_logs
+    Admin action trail.
+    Columns: admin_id, action, details, created_at
+    WHY:  Track what admins do for accountability.
+
+16. parent_preferences
+    Meal suggestions from parents.
+    Columns: parent_id, menu_item_id, preference_date, note
+    WHY:  Parents can suggest "Order the sandwich today!"
+
+17. behavioral_scores
+    Behavior score history.
+    Columns: student_id, score, reason, updated_by
+    WHY:  Tracks changes to student behavior scores over time.
+
+18. staff_activity_log
+    Canteen staff activity.
+    Columns: staff_id, action, details, created_at
+    WHY:  Track what canteen staff do.
+
+19. token_verification_log
+    Token verification attempts.
+    Columns: order_id, token, success, staff_id, ip_address
+    WHY:  Security audit for pickup token verification.
+
+DATABASE CONNECTION CODE:
+  The database connection is in config/database.php. Here's what it does:
+
+  $pdo = new PDO(
+      "mysql:host=127.0.0.1;dbname=smeic_canteen;charset=utf8mb4",
+      "root",
+      ""
+  );
+
+  - host: 127.0.0.1 = the database is on the same computer
+  - dbname: smeic_canteen = the name of our database
+  - charset: utf8mb4 = supports all characters including emojis
+  - root = the default MySQL username on XAMPP
+  - "" = the default MySQL password on XAMPP (empty)
+
+PREPARED STATEMENTS:
+  Instead of writing:
+    ❌ "SELECT * FROM students WHERE student_id = '$user_input'"
+    (This is DANGEROUS — a hacker could type: ' OR '1'='1 and get all students)
+
+  We write:
+    ✅ $stmt = $pdo->prepare("SELECT * FROM students WHERE student_id = ?");
+    $stmt->execute([$user_input]);
+    (The ? is a PLACEHOLDER — PHP safely inserts the value separately)
+
+  This is the SINGLE MOST IMPORTANT security practice in the entire codebase.
+
+AUTO-MIGRATIONS:
+  When the app starts, smeic_run_schema_migrations() checks if all columns
+  and tables exist. If any are missing (e.g., after an upgrade), it adds them
+  automatically. This means upgrades are seamless.
+
+
+================================================================================
+11. HOW MONEY (WALLET) OPERATIONS WORK
+================================================================================
+
+This is the MOST CRITICAL part of the system. Money bugs can cause real harm.
+
+THERE ARE THREE TYPES OF MONEY OPERATIONS:
+
+1. ADMIN TOP-UP:  Admin adds money to a parent or student wallet
+2. PARENT TRANSFER: Parent sends money from their wallet to their child's wallet
+3. STUDENT CHECKOUT: Student pays for food from their wallet
+
+ALL THREE USE THE SAME SAFETY PATTERN:
+
+  Step 1: START A TRANSACTION
+    $pdo->beginTransaction();
+    // This means: "I'm about to do multiple database changes.
+    //              If anything goes wrong, undo EVERYTHING."
+
+  Step 2: LOCK THE WALLET ROW
+    $stmt = $pdo->prepare("SELECT balance FROM wallets WHERE student_id=? FOR UPDATE");
+    $stmt->execute([$student_id]);
+    $balance = (float)$stmt->fetchColumn();
+
+    // FOR UPDATE means: "Lock this row so no one else can change it
+    //                    while I'm working. This prevents two people
+    //                    from spending the same money at the same time."
+
+  Step 3: CHECK IF ENOUGH MONEY
+    if ($balance < $total) {
+        throw new RuntimeException('Insufficient balance');
+    }
+
+  Step 4: DEDUCT THE MONEY
+    $pdo->prepare("UPDATE wallets SET balance = balance - ? WHERE student_id = ?")
+        ->execute([$total, $student_id]);
+
+  Step 5: CREATE THE ORDER AND TRANSACTION RECORD
+    // Insert into orders table
+    // Insert into order_items table
+    // Insert into transactions table (debit record)
+    // Send notifications
+
+  Step 6: COMMIT (save everything)
+    $pdo->commit();
+    // All changes are saved permanently.
+
+  IF ANYTHING GOES WRONG:
+    $pdo->rollBack();
+    // Everything is UNDONE — as if nothing happened.
+    // The student keeps their money. No partial orders.
+
+WHY TWO TRANSACTION RECORDS FOR TRANSFERS?
+  When a parent transfers ₹100 to a child:
+    - Parent gets a DEBIT transaction: -₹100
+    - Child gets a CREDIT transaction: +₹100
+  This ensures the "books always balance" — like a real bank.
+
+CHECKOUT SPECIFICALLY:
+  When a student checks out:
+    1. Lock the student's wallet row (FOR UPDATE)
+    2. Check if balance >= order total
+    3. Deduct the total from wallet
+    4. Create the order (status: pending)
+    5. Create order_items (snapshot of items and prices)
+    6. Create transaction record (debit)
+    7. Clear the student's cart
+    8. Notify canteen staff (new order!)
+    9. Notify the parent (your child ordered food)
+    10. Commit everything
+
+  If ANY step fails, everything is rolled back. No partial orders, no lost money.
+
+
+================================================================================
+12. HOW ORDERS WORK (ORDER LIFECYCLE)
+================================================================================
+
+Every order goes through these stages:
+
+  PENDING → ACCEPTED → PREPARING → READY → PICKED_UP
+     │         │           │          │
+     └─────────┴───────────┴──────────┘
+                    ↓
+              CANCELLED (at any stage before pickup)
+
+DETAILED EXPLANATION:
+
+1. PENDING
+   - Student places the order
+   - Money is deducted from wallet
+   - Canteen staff sees a new order
+   - Parent gets a notification
+
+2. ACCEPTED
+   - Canteen staff clicks "Accept"
+   - They can set an estimated prep time (e.g., "10 minutes")
+   - Student gets notified: "Your order has been accepted!"
+
+3. PREPARING
+   - Food is being cooked/prepared
+   - (Optional intermediate stage)
+
+4. READY
+   - Canteen staff clicks "Mark Ready"
+   - ready_at timestamp is set (records the exact time)
+   - Student gets notified: "Your order is ready for pickup!"
+   - Parent gets notified too
+   - 3-MINUTE REMINDER TIMER STARTS:
+     - Every 60 seconds, the system checks: "Has it been 3+ minutes?"
+     - If yes: sends a "Please pick up your order!" reminder
+     - Maximum 3 reminders
+     - This prevents food from sitting uncollected
+
+5. PICKED_UP
+   - Student shows their QR code at the canteen
+   - Staff scans/enters the 6-digit token
+   - System marks the order as picked up
+   - Student gets notified: "Order complete! Enjoy your meal!"
+
+6. CANCELLED
+   - Canteen staff can cancel at any stage BEFORE pickup
+   - FULL REFUND is automatically issued to student's wallet
+   - Student and parent are notified
+
+PICKUP TOKENS:
+  - 6-digit random number (e.g., 847291)
+  - Generated using random_int() (cryptographically secure)
+  - Contains NO personal information (just a random number)
+  - Expires after 24 hours
+  - Rate limited: max 5 verification attempts per 15 minutes
+  - Every verification attempt is logged for security
+
+
+================================================================================
+13. HOW NOTIFICATIONS WORK
+================================================================================
+
+Notifications are in-app messages that alert users about important events.
+
+WHEN NOTIFICATIONS ARE SENT:
+  - Student places an order → canteen + parent get notified
+  - Canteen accepts order → student gets notified
+  - Canteen marks order ready → student + parent get notified
+  - Canteen cancels order → student + parent get notified
+  - Admin tops up wallet → recipient gets notified
+  - Parent transfers money → child gets notified
+  - 3-minute pickup reminder → student gets notified
+
+HOW THE NOTIFICATION BELL WORKS:
+  1. The sidebar has a bell icon with a badge showing unread count
+  2. Every 10 seconds, JavaScript calls: api/check-notifications.php
+  3. The API returns: { "count": 3, "latest": { "title": "Order Ready!", ... } }
+  4. If count > 0, the bell badge shows the number
+  5. A toast notification pops up with the latest message
+
+THE CODE (in notifications.js):
+  setInterval(function() {
+      smeicAjax('api/check-notifications.php', {}, function(data) {
+          if (data.count > 0) {
+              bellBadge.textContent = data.count;
+              showToast(data.latest.title, data.latest.message);
+          }
+      });
+  }, 10000);  // Every 10,000 milliseconds = 10 seconds
+
+PICKUP REMINDERS (in api/check-pickup-reminders.php):
+  - Runs every 60 seconds (triggered by notifications.js)
+  - Finds orders where: status='ready' AND ready_at < NOW - 3 minutes
+  - Sends a reminder notification to the student
+  - Maximum 3 reminders per order
+  - Idempotent: safe to call multiple times (won't send duplicate reminders)
+
+
+================================================================================
+14. HOW FILE UPLOADS WORK
+================================================================================
+
+Canteen staff can upload images for menu items. Here's how it works:
+
+VALIDATION CHECKS (in CanteenController::menuSave()):
+  1. FILE SIZE: Must be under 4MB
+  2. MIME TYPE: Must be an image (jpg, png, webp) — checked with mime_content_type()
+  3. DIMENSIONS: getimagesize() verifies it's actually an image file
+  4. FILENAME: Renamed with uniqid() — NEVER use the user's original filename
+
+  WHY RENAME?  If a user uploads a file called "hack.php.jpg", we don't want
+  to save it with that name. By renaming it to something like "6654a3b2c1.jpg",
+  we eliminate any risk of the file being executed as code.
+
+STORAGE:
+  Images are saved to: public/assets/uploads/menu/
+  The database stores just the filename (not the full path).
+
+DISPLAY:
+  The menu_image() helper function returns the image URL:
+    - If the file exists: returns the path to the uploaded image
+    - If not: returns a placeholder image
+
+
+================================================================================
+15. HOW QR CODES AND PICKUP TOKENS WORK
+================================================================================
+
+When a student places an order, a 6-digit pickup token is generated:
+
+TOKEN GENERATION (in generate_pickup_token()):
+  $token = str_pad(random_int(100000, 999999), 6, '0', STR_PAD_LEFT);
+
+  - random_int() is CRYPTOGRAPHICALLY SECURE (not rand() or mt_rand())
+  - The token is a 6-digit number: 100000 to 999999
+  - This gives 900,000 possible combinations — hard to guess
+
+TOKEN VERIFICATION:
+  When the student arrives at the canteen:
+  1. They show their QR code (or tell the staff the 6-digit number)
+  2. Staff enters the token at: canteen/scan-pickup
+  3. System checks:
+     - Does the token match an order?
+     - Is the order in "ready" status?
+     - Is the token expired (24-hour limit)?
+     - Has the student exceeded the rate limit (5 attempts per 15 min)?
+  4. If all checks pass: order is marked as "picked_up"
+
+QR CODE GENERATION:
+  Two methods:
+  1. OFFLINE (preferred): chillerlan/php-qrcode library
+     - Generates QR code directly in PHP
+     - Works without internet
+  2. ONLINE (fallback): api.qrserver.com
+     - If the library isn't installed
+     - Requires internet connection
+
+RATE LIMITING:
+  - Maximum 5 token verification attempts per session
+  - If exceeded: 15-minute lockout
+  - Prevents brute-force attacks on the 6-digit token
+  - Every attempt is logged in token_verification_log table
+
+
+================================================================================
+16. HOW THE API ENDPOINTS WORK
+================================================================================
+
+The app has JSON-only API endpoints in public/api/ for AJAX calls.
+These return DATA (JSON), not HTML pages.
+
+SHARED SETUP (public/api/_bootstrap.php):
+  Every API endpoint starts by including this file, which:
+  1. Starts the session
+  2. Sets the Content-Type header to application/json
+  3. Registers an error handler that returns JSON even on crashes
+
+KEY API ENDPOINTS:
+
+update-cart.php (POST)
+  INPUT:  { menu_item_id: 5, quantity: 2 }
+  CHECKS: User is logged in? Is a student? CSRF token valid? Item exists? Available?
+  ACTION: Adds/updates/removes item from cart
+  OUTPUT: { ok: true, quantity: 2, cart_count: 3 }
+
+transfer-funds.php (POST)
+  INPUT:  { student_id: 1, amount: 500 }
+  CHECKS: User is a parent? Owns this student? CSRF valid? Enough balance?
+  ACTION: Atomic transfer with double transaction record
+  OUTPUT: { ok: true, new_parent_balance: 1500, new_student_balance: 2000 }
+
+check-notifications.php (GET)
+  INPUT:  (none — uses session)
+  CHECKS: User is logged in?
+  ACTION: Counts unread notifications, gets latest one
+  OUTPUT: { count: 3, latest: { title: "Order Ready!", message: "..." } }
+
+get-order-status.php (GET)
+  INPUT:  ?order_id=123
+  CHECKS: User is logged in? Has permission to view this order?
+  ACTION: Returns current order status and timeline
+  OUTPUT: { status: "ready", ready_at: "2026-07-26 10:30:00", ... }
+
+check-pickup-reminders.php (GET)
+  INPUT:  (none)
+  ACTION: Finds "ready" orders older than 3 minutes, sends reminders
+  OUTPUT: { ok: true, reminders_sent: 2 }
+
+
+================================================================================
+17. HOW SECURITY IS HANDLED
+================================================================================
+
+Here is a COMPLETE list of every security measure in the project:
+
+1. SQL INJECTION PREVENTION
+   Every database query uses PDO prepared statements.
+   User input is NEVER concatenated into SQL strings.
+   This is verified across the ENTIRE codebase — zero exceptions.
+
+2. CROSS-SITE SCRIPTING (XSS) PREVENTION
+   All output is escaped via e() = htmlspecialchars($val, ENT_QUOTES, 'UTF-8').
+   This converts special characters to safe HTML entities:
+     < becomes &lt;
+     > becomes &gt;
+     " becomes &quot;
+     ' becomes &#039;
+   Example: If someone puts <script>alert('hacked')</script> as their name,
+            it displays as plain text, not executable code.
+
+3. CROSS-SITE REQUEST FORGERY (CSRF) PREVENTION
+   Every form includes a hidden csrf_token field.
+   Every AJAX call includes an X-CSRF-Token header.
+   Tokens are validated with hash_equals() (constant-time comparison).
+   Tokens are generated once per session using bin2hex(random_bytes(32)).
+
+4. SESSION FIXATION PREVENTION
+   session_regenerate_id(true) is called on every successful login.
+   This creates a new session ID, making the old one useless to attackers.
+
+5. PASSWORD SECURITY
+   Stored as bcrypt hashes (PASSWORD_BCRYPT, cost 10).
+   Never stored as plain text.
+   Never logged or displayed anywhere.
+
+6. SECURITY HEADERS (set in views/layouts/header.php)
+   X-Content-Type-Options: nosniff       → Prevents MIME type sniffing
+   X-Frame-Options: SAMEORIGIN           → Prevents clickjacking
+   X-XSS-Protection: 1; mode=block       → Browser XSS filter
+   Referrer-Policy: strict-origin...     → Controls referrer info
+   Permissions-Policy: camera=()         → Disables camera/mic/geo
+   Strict-Transport-Security: max-age... → Forces HTTPS
+   Content-Security-Policy               → Controls allowed resources
+
+7. FILE UPLOAD SECURITY
+   MIME type validation (mime_content_type)
+   Image dimension validation (getimagesize)
+   Maximum file size (4MB)
+   Filenames renamed (uniqid) — user input never trusted
+
+8. WALLET INTEGRITY
+   SELECT ... FOR UPDATE row-level locks
+   PDO transactions with commit/rollback
+   Atomic operations — all or nothing
+
+9. ACCESS CONTROL
+   require_role(['admin']) at top of every controller method
+   Force password change on first login
+
+10. DIRECTORY PROTECTION
+    Root .htaccess blocks access to config/, controllers/, logs/, etc.
+    Public .htaccess blocks .env, .sql, .log, .md, .ini, .yml files
+
+11. TOKEN RATE LIMITING
+    Max 5 verification attempts per 15-minute window
+    Prevents brute-force attacks on 6-digit tokens
+
+12. AUDIT LOGGING
+    Every admin action is logged with:
+      - Who did it (admin_id)
+      - What they did (action)
+      - Details (details)
+      - When (created_at)
+
+13. NO eval() OR UNSAFE JS
+    No eval() function used anywhere
+    No inline event handlers for untrusted data
+    Prevents JavaScript injection attacks
+
+
+================================================================================
+18. ALL HELPER FUNCTIONS EXPLAINED
+================================================================================
+
+These are in config/functions.php — the "utility belt" of the entire app:
+
+OUTPUT & URL HELPERS:
+
+e($value)
+  PURPOSE: Makes text safe for display in HTML
+  CODE: return htmlspecialchars($val, ENT_QUOTES, 'UTF-8');
+  EXAMPLE: e('<script>') returns '&lt;script&gt;'
+  WHY: Prevents XSS attacks
+
+url($path)
+  PURPOSE: Creates a URL relative to the base URL
+  CODE: return BASE_URL . '/' . ltrim($path, '/');
+  EXAMPLE: url('student/dashboard') returns 'http://localhost/SMEIC/public/student/dashboard'
+
+redirect($url)
+  PURPOSE: Sends the user to a different page
+  CODE: header("Location: $url"); exit;
+  WHY: After doing something (like logging in), redirect to a new page
+
+json_response($data, $code = 200)
+  PURPOSE: Sends a JSON response (for AJAX endpoints)
+  CODE: http_response_code($code); echo json_encode($data); exit;
+
+json_input()
+  PURPOSE: Reads JSON data from an AJAX request
+  CODE: return json_decode(file_get_contents('php://input'), true);
+
+SECURITY HELPERS:
+
+csrf_token()
+  PURPOSE: Generates or returns the CSRF token for this session
+  CODE: If $_SESSION['csrf_token'] doesn't exist, creates one using
+        bin2hex(random_bytes(32))
+
+csrf_field()
+  PURPOSE: Outputs a hidden HTML input field with the CSRF token
+  CODE: echo '<input type="hidden" name="csrf_token" value="' . csrf_token() . '">';
+
+csrf_check()
+  PURPOSE: Validates the CSRF token on form submission
+  CODE: Compares $_SESSION['csrf_token'] with $_POST['csrf_token']
+        using hash_equals() (constant-time comparison)
+  ACTION: Dies with 403 error if token is invalid
+
+AUTHENTICATION HELPERS:
+
+current_user()
+  PURPOSE: Returns info about the logged-in user
+  CODE: Returns an array with user_id, role, name, etc. from $_SESSION
+        Returns null if not logged in
+
+require_login()
+  PURPOSE: Redirects to login page if no one is logged in
+  CODE: if (!current_user()) { redirect to login page; }
+
+require_role($roles)
+  PURPOSE: Requires the user to have a specific role
+  CODE: require_login() + checks if $_SESSION['role'] is in the allowed list
+  EXAMPLE: require_role(['admin']) → only admins can proceed
+
+MESSAGE HELPERS:
+
+flash_set($key, $message)
+  PURPOSE: Sets a one-time message (shown once, then disappears)
+  CODE: $_SESSION['flash'][$key] = $message;
+  EXAMPLE: flash_set('success', 'Order placed successfully!')
+
+flash_get($key)
+  PURPOSE: Gets and removes a flash message
+  CODE: Gets the message, then deletes it from the session
+  WHY: The message only shows once — on the next page load
+
+WALLET HELPERS:
+
+get_student_balance($student_id)
+  PURPOSE: Gets the current wallet balance for a student
+  CODE: SELECT balance FROM wallets WHERE student_id = ?
+
+get_parent_balance($parent_id)
+  PURPOSE: Gets the current wallet balance for a parent
+  CODE: SELECT wallet_balance FROM parents WHERE id = ?
+
+NOTIFICATION HELPERS:
+
+notify($user_id, $user_type, $title, $message)
+  PURPOSE: Sends an in-app notification to any user
+  CODE: INSERT INTO notifications (user_id, user_type, title, message) VALUES (?, ?, ?, ?)
+  EXAMPLE: notify(1, 'student', 'Order Ready!', 'Your food is ready for pickup')
+
+send_pickup_reminder($order, $student)
+  PURPOSE: Sends a pickup reminder for a ready order
+  CODE: Calls notify() with a reminder message
+
+dispatch_pickup_reminders()
+  PURPOSE: Finds all orders that need reminders and sends them
+  CODE: SELECT orders WHERE status='ready' AND ready_at < NOW - 3 minutes
+        For each: increment reminder count, send notification
+  SAFE: Idempotent — won't send duplicate reminders
+
+MENU HELPERS:
+
+menu_image($item)
+  PURPOSE: Returns the image URL for a menu item
+  CODE: If uploaded image exists, return its path. Otherwise, return placeholder.
+
+get_active_special()
+  PURPOSE: Gets today's daily special menu item
+  CODE: SELECT from daily_specials WHERE special_date = CURDATE() AND is_active = 1
+
+TOKEN HELPERS:
+
+generate_pickup_token()
+  PURPOSE: Creates a cryptographically secure 6-digit token
+  CODE: str_pad(random_int(100000, 999999), 6, '0', STR_PAD_LEFT)
+
+is_token_expired($token_generated_at)
+  PURPOSE: Checks if a token is older than 24 hours
+  CODE: Compares token_generated_at with current time
+
+check_token_rate_limit($session_id)
+  PURPOSE: Checks if too many verification attempts were made
+  CODE: Returns true if attempts >= 5 within 15 minutes
+
+increment_token_rate_limit($session_id)
+  PURPOSE: Adds one more verification attempt
+  CODE: Increments the counter in session
+
+reset_token_rate_limit($session_id)
+  PURPOSE: Resets the counter after a successful verification
+  CODE: Sets counter to 0
+
+log_token_verification($order_id, $token, $success, $staff_id)
+  PURPOSE: Logs every verification attempt for security audit
+  CODE: INSERT INTO token_verification_log
+
+UTILITY HELPERS:
+
+generate_id($prefix, $table, $column)
+  PURPOSE: Auto-incrementing IDs like S10001, S10002, P10001, P10002
+  CODE: SELECT MAX(id) FROM table WHERE column LIKE 'S%'
+        Increments by 1
+
+random_password($length = 12)
+  PURPOSE: Generates a random password for new accounts
+  CODE: Uses random_bytes() for cryptographic security
+
+money($amount)
+  PURPOSE: Formats a number as currency
+  EXAMPLE: money(1500) returns "₹1,500.00"
+
+dt_fmt($datetime)
+  PURPOSE: Formats a datetime string for display
+  EXAMPLE: dt_fmt("2026-07-26 10:30:00") returns "Jul 26, 2026 10:30 AM"
+
+app_log($message)
+  PURPOSE: Writes a message to the error log
+  CODE: error_log("[SMEIC] $message")
+
+audit($action, $details)
+  PURPOSE: Logs an admin action
+  CODE: INSERT INTO audit_logs (admin_id, action, details) VALUES (?, ?, ?)
+
+
+================================================================================
+19. HOW TO ADD NEW FEATURES
+================================================================================
+
+ADDING A NEW PAGE:
+
+  Step 1: Create a view file
+    → views/student/my-new-page.php
+    → Add HTML/PHP for the page
+
+  Step 2: Add a controller method
+    → In controllers/StudentController.php, add:
+       public function myNewPage() {
+           require_role(['student']);
+           // ... business logic ...
+           render_with_layout('student/my-new-page', ['data' => $data]);
+       }
+
+  Step 3: Add a route in public/index.php
+    → In the switch statement, add:
+       case 'student/my-new-page':
+           (new StudentController())->myNewPage();
+           break;
+
+  Step 4: Add a sidebar link (optional)
+    → In views/layouts/sidebar.php, add the link to the student menu array
+
+ADDING A NEW ROLE:
+
+  Step 1: Add the role to the users table ENUM
+    → ALTER TABLE users MODIFY COLUMN role ENUM('admin','parent','canteen','newrole');
+
+  Step 2: Create a new controller
+    → controllers/NewRoleController.php
+
+  Step 3: Add routes in public/index.php
+    → Add case 'newrole/dashboard': etc.
+
+  Step 4: Add a sidebar section in views/layouts/sidebar.php
+
+ADDING A NEW PAYMENT GATEWAY:
+
+  Step 1: Create a gateway class
+    → e.g., PaymentGateways/Razorpay.php
+
+  Step 2: Modify the checkout() method in StudentController
+    → Instead of wallet deduction, call the gateway API
+    → On success, credit the wallet and create the order
+
+  Step 3: Modify the topup() method in AdminController similarly
+
+
+================================================================================
+20. COMMON PROBLEMS AND SOLUTIONS
+================================================================================
+
+"Database connection failed"
+  CAUSE: MySQL is not running, or wrong credentials in config/database.php
+  FIX: Start MySQL in XAMPP. Check host/user/password in config/database.php.
+
+"Invalid login" for all accounts
+  CAUSE: The database has placeholder password hashes, not real bcrypt hashes
+  FIX: Open http://localhost/SMEIC/public/generate_hashes.php in your browser
+
+Page keeps redirecting to change-password
+  CAUSE: force_password_change = 1 in your session
+  FIX: Log in once with the default password. You'll be sent to change-password.
+       Set a new password there. Or visit clear_force_change.php.
+
+"500 Internal Server Error"
+  CAUSE: A PHP error occurred
+  FIX: Check logs/php_error.log for the detailed error message
+
+Image upload fails
+  CAUSE: The uploads directory is not writable
+  FIX: Right-click public/assets/uploads/menu → Properties → Security →
+       Edit → Allow Modify for Everyone (on XAMPP)
+
+PDF export downloads as HTML
+  CAUSE: dompdf library is not installed
+  FIX: Run "composer install" in the project directory
+
+QR code shows broken image
+  CAUSE: chillerlan/php-qrcode library is not installed AND you're offline
+  FIX: Run "composer install" OR connect to internet (uses online QR fallback)
+
+Sidebar doesn't collapse on mobile
+  CAUSE: Old browser that doesn't support modern CSS
+  FIX: Use Chrome, Firefox, or Edge (latest version)
+
+"Permission denied" error
+  CAUSE: Trying to access a folder that's blocked by .htaccess
+  FIX: This is CORRECT behavior. Only public/ should be web-accessible.
+
+
+================================================================================
+21. WHAT THIS SYSTEM IS NOT DESIGNED FOR
+================================================================================
+
+This is important to understand the limitations:
+
+  ✗ Not designed for high-frequency trading or real-time collaboration
+  ✗ Not designed for concurrent writes to the same wallet by the same user
+    (the FOR UPDATE lock works per-request, not across requests)
+  ✗ Not designed for audit-grade financial reporting
+    (no double-entry bookkeeping, no immutable ledger)
+  ✗ Not designed for HIPAA/PCI-DSS compliance
+    (no encryption at rest, no audit chain-of-custody)
+  ✗ Not designed for multi-currency or multi-region deployment
+  ✗ Not designed for image processing or AI features
+
+
+================================================================================
+22. CAPACITY AND SCALABILITY
+================================================================================
+
+CURRENT CAPACITY (Single-Server XAMPP):
+  Concurrent users:    50-150 simultaneous sessions
+  Daily active users:  1,000-5,000
+  Database size:       ~50 MB for 1 year at 500 students
+  Order throughput:    ~100 orders/min sustained
+
+KNOWN BOTTLENECKS (in order of impact):
+  1. PHP file sessions — one file per user, locked during writes
+     SOLUTION: Switch to Redis or Memcached sessions
+  2. Notification polling every 10 seconds per user
+     SOLUTION: Use WebSocket or Server-Sent Events
+  3. Single MySQL server (no read replicas)
+     SOLUTION: Add MySQL read replicas
+  4. 60-second pickup reminder scan
+     SOLUTION: Add index on (status, ready_at, pickup_reminder_count)
+  5. Synchronous mail
+     SOLUTION: Use a queue (Redis/RabbitMQ) for mail
+
+SCALING TO 5,000+ USERS:
+  → PHP-FPM + Nginx (instead of Apache mod_php)
+  → Redis for sessions and notification pub/sub
+  → WebSocket or SSE (instead of polling)
+  → MySQL read replicas for reports
+  → Queue for mail and reminders
+
+
+================================================================================
+DEVELOPER CREDITS
+================================================================================
+
+This project was developed by:
+
+  ┌─────────────────────────────────────────────────────────────┐
+  │  Mr. Krischal Pathak ............... Lead Developer         │
+  │  Mr. Rupesh Adhikari ............... Backend Developer      │
+  │  Mr. Aryan Thapa ................... Frontend Developer     │
+  │  Mrs. Jenisha Chaudhary ............ Developer              │
+  └─────────────────────────────────────────────────────────────┘
+
+Developed as an academic project with production-level code quality,
+security best practices, and comprehensive documentation.
+
+================================================================================
+END OF DOCUMENT
+================================================================================
+For installation instructions, see README.md.
+For questions or issues, contact the development team.
